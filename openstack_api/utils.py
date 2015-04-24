@@ -15,13 +15,13 @@ cookie = None
 def json_request(url , method, data, headers):
     global cookie
 
-    print url
+    #print url
     parts = urlparse(url)
     if cookie:
         headers['Cookie'] = cookie;
     if data:
         data = json.dumps(data)
-    print data
+    #print data
     kwargs = {}
     if version_info[1] < 6:
         socket.setdefaulttimeout(30)

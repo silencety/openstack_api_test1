@@ -9,14 +9,14 @@ from utils import json_request
 
 #endpoint = 'http://192.168.0.2:5000'
 
-def _conn_keystone(ip,port = "5000"):
+def _conn_keystone(ip,username="admin",password = "admin123",port = "5000"):
     '''
     curl -i http://192.168.0.2:5000/v2.0/tokens -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "User-Agent: python-neutronclient" -d '{"auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": "admin123"}}}'
    
     return token id
     '''
     url =  "http://"+ip+":"+port+"/v2.0/tokens"
-    data = {"auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": "admin123"}}}
+    data = {"auth": {"tenantName": "admin", "passwordCredentials": {"username": username, "password": password}}}
     headers = {'Content-Type': 'application/json','User-Agent': 'python-neutronclient','Accept': 'application/json'}
     result = json_request(url,'POST',data , headers)
     if not result.has_key("access"):
@@ -52,11 +52,11 @@ def _query_routers(result):
 
    
 
-def query_routers(ip): 
+def query_routers(ip,username="admin",password = "admin123"): 
     
     ret={}   
 
-    result = _conn_keystone(ip)
+    result = _conn_keystone(ip,username="admin",password = "admin123")
     routers = _query_routers(result)
     for one in routers:
         ret[one['id']] = one

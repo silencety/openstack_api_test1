@@ -2,8 +2,9 @@
 
 @author: tianyuan8
 '''
-
 import sys
+import MySQLdb
+import string
 from find_tenant import query_tenant
 from find_flavor import query_flavor
 from find_vms import query_vm
@@ -61,19 +62,29 @@ for vm in vms:
         
 if t_id:
     sort_dict = {t_id:sort_dict[t_id]}
-        
-print "===============================================================================================================================" 
+
+conn =   MySQLdb.connect(host="localhost",user="tianyuan",passwd="tianyuan",db="statistic",charset="utf8")        
+cursor = conn.cursor()
+delete_all = "delete from Tenant"      
+cursor.execute(delete_all) 
+
 tenant_num = 0       
 for one in sort_dict:
+    value = []
     tenant_num = tenant_num +1
-    print "TENANT_ID :    %s"%(one)
+    #print "TENANT_ID :    %s"%(one)
+    value.append(one)
     if tenants.has_key(one):
-        print "TENANT_NAME :    %s"%(tenants[one]["name"])
+        #print "TENANT_NAME :    %s"%(tenants[one]["name"])
+        value.append(tenants[one]["name"])
     else:
-        print "TENANT_NAME :    %s"%("UNKNOWN")
+        value.append('UNKNOWN')
+        #print "TENANT_NAME :    %s"%("UNKNOWN")
         
     quota =   query_tenant_quota(ip, one ,USERNAME,PASSWORD)
-    print "VM COUNT :    %s/%s"%(len(sort_dict[one]),quota['instances'])
+    #print "VM COUNT :    %s/%s"%(len(sort_dict[one]),quota['instances'])
+    value.append(len(sort_dict[one]))
+    value.append(quota['instances'])
     ram = 0
     cpu = 0
     disk = 0
@@ -82,13 +93,21 @@ for one in sort_dict:
         ram = ram + flavors[flavor_id]["ram"]
         cpu = cpu + flavors[flavor_id]["vcpus"]
         disk = disk + flavors[flavor_id]["disk"]
-    print "VM CPU :    %s/%s"%(cpu,quota['cores'])
-    print "VM RAM :    %s/%s"%(ram,quota['ram'])
-    print "vm DISK:    %s"%(disk)
+    value.append(cpu)
+    value.append(quota['cores'])
+    value.apend(ram)
+    value.append(quota['ram'])
+    value.append(disk)
+    print value
+    cursor.execute('insert into Tenant values(%s,%s,%s,%s,%s,%s,%s,%s,%s)',value)
+    #print "VM CPU :    %s/%s"%(cpu,quota['cores'])
+    #print "VM RAM :    %s/%s"%(ram,quota['ram'])
+    #print "vm DISK:    %s"%(disk)
                      
     
-    print ""
+    #print ""
     
+
     if VM_DETAIL:
         
         print "**************************************************************************************************************************"
@@ -107,5 +126,7 @@ for one in sort_dict:
             print one_vm['addresses']
             
       
-          
-          
+conn.commit()
+cursor.close()
+conn.close 
+  

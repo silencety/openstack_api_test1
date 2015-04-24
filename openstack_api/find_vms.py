@@ -7,13 +7,13 @@ from utils import json_request
 
 
 
-def _conn_keystone(ip,port = "5000"):
+def _conn_keystone(ip,username="admin",password = "admin123",port = "5000"):
     '''
     curl -i 'http://192.168.0.2:5000/v2.0/tokens' -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "User-Agent: python-novaclient" -d '{"auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": "admin123"}}}'
     return token id
     '''
     url =  "http://"+ip+":"+port+"/v2.0/tokens"
-    data = {"auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": "admin123"}}}
+    data = {"auth": {"tenantName": "admin", "passwordCredentials": {"username": username, "password": password}}}
     headers = {'Content-Type': 'application/json','User-Agent': 'python-novaclient', 'Accept':"application/json"}
     result = json_request(url,'POST',data , headers)
     if not result.has_key("access"):
@@ -46,10 +46,10 @@ def _query_vm(result):
         raise Exception("query vm error")
   
 
-def query_vm(ip):
+def query_vm(ip,username="admin",password = "admin123"):
     
 
-    result = _conn_keystone(ip)
+    result = _conn_keystone(ip,username="admin",password = "admin123")
     vms = _query_vm(result)
     return vms
 
